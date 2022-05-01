@@ -34,6 +34,8 @@ use as the bot. The webpage will output a token.
 
 https://pkteerium.xyz/@IndependentFactCheckers
 
+![Example of asking question to fact checker](https://github.com/cjdelisle/IndependentFactCheckers/blob/main/fact_checker_example.png?raw=true)
+
 ## License
 
 AGPLv3
