@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-only
 const Megalodon = require('megalodon');
 const Config = require('./config');
 const Fs = require('fs');
@@ -88,18 +89,14 @@ const requestAI = (txt, cb) => {
 const processNotif = (notification) => {
     if (typeof(notification.status) !== 'object') { return; }
     if (typeof(notification.status.content) !== 'string') { return; }
-    // console.log(notification);
-    // if (typeof(notification.status.mentions) !== 'undefined') {
-    //     for (const m of notification.status.mentions) {
-    //         console.log(m);
-    //     }
-    // }
+    if (!notification.account || notification.account.bot) { return; }
+
     const txt = unfuckHtml(stripHtml(notification.status.content));
-    console.log(txt);
+    //console.log(txt);
     if (!txt.startsWith('@IndependentFactCheckers ')) {
-        console.log('I am not mentioned\n');
+        //console.log('I am not mentioned\n');
     } else if (txt.lastIndexOf('@') !== 0) {
-        console.log('Others are mentioned\n');
+        //console.log('Others are mentioned\n');
     } else {
         let lTxt = txt.toLowerCase();
         for (const bw of Config.badWords) {
@@ -110,11 +107,9 @@ const processNotif = (notification) => {
         const txt1 = txt.replace('@IndependentFactCheckers ', '');
         console.log('< ' + txt1);
         requestAI(txt1 + '\n\nIndependent Fact Checkers Say:', (resp) => {
-            //console.log(resp);
             const accts = [];
             if (typeof(notification.status.mentions) !== 'undefined') {
                 for (const m of notification.status.mentions) {
-                    //console.log(m);
                     accts.push('@' + m.acct);
                 }
             }
@@ -137,8 +132,9 @@ const main = () => {
     let lastHb = +new Date();
     setInterval(() => {
         if (((+new Date()) - lastHb) > 120000) {
-            //console.log("No heartbeat, lost connection");
-//            process.exit(100);
+            // Pleroma doesn't send heartbeats :(
+            // console.log("No heartbeat, lost connection");
+            // process.exit(100);
         }
     }, 1000);
     stream.on('connect', () => {
@@ -146,7 +142,6 @@ const main = () => {
     });
     stream.on('notification', (notification) => {
         processNotif(notification);
-        //console.log(notification);
     });
     stream.on('close', () => {
         console.log('socket closed');
